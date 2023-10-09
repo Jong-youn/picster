@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:13306/pinster
+    username: root
+    password: root
+logging:
+  level:
+    org.springframework.jdbc: DEBUG
