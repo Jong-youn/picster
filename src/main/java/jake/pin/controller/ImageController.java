@@ -52,6 +52,15 @@ public class ImageController {
         service.modify(dto);
     }
 
+    @DeleteMapping("/{imageId}")
+    public void remove(@RequestHeader("Authorization") Long userId,
+                       @PathVariable Long imageId) {
+        validateUserId(userId);
+        validateImageId(imageId);
+
+        service.remove(imageId, userId);
+    }
+
     private void validateUserId(Long userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("로그인이 필요한 기능입니다.");

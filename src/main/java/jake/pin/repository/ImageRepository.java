@@ -92,4 +92,25 @@ public class ImageRepository {
             return 0;
         }
     }
+
+    public int remove(Image image) {
+        try {
+            StringBuilder query = new StringBuilder();
+            query.append(" UPDATE /* ImageRepository_remove */ image ");
+            query.append(" SET  updated_at = :deletedAt, ");
+            query.append("      deleted_at = :deletedAt ");
+            query.append(" WHERE id = :id ");
+            query.append("   AND user_id = :userId ");
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("deletedAt", image.getDeletedAt());
+            params.addValue("id", image.getId());
+            params.addValue("userId", image.getUserId());
+
+            return jdbcTemplate.update(query.toString(), params);
+        } catch (Exception e) {
+            log.warn("[ImageRepository:remove] msg: " + e.getMessage(), e);
+            return 0;
+        }
+    }
 }

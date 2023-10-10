@@ -83,6 +83,47 @@ public class ImageService {
         }
     }
 
+    public void remove(long imageId, long userId) {
+        // 유저가 포스팅한 이미지인지 확인
+        Image image = repository.getImageByIdAndUserId(imageId, userId);
+        if (image == null) {
+            log.warn("부적절한 이미지 삭제시도가 의심됩니다.");
+            throw new IllegalArgumentException("이미지를 찾을 수 없습니다.");
+        }
+
+        // 데이터베이스에서 소프트 딜리트
+        Image deletedImage = Image.builder()
+                .id(imageId)
+                .deletedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                .userId(userId)
+                .build();
+        int removeResult = repository.remove(deletedImage);
+        if (removeResult < 1) {
+            throw new RuntimeException("이미지 삭제에 실패했습니다. 다시 시도해주세요.");
+        }
+
+        // 스토리지에서 데이터 삭제
+        boolean result = removeInStorage(image.getImageUrl());
+        if (!result) {
+            log.warn("이미지를 스토리지에서 삭제하는데 실패했습니다. imageId: " + imageId);
+        }
+    }
+
+    private boolean removeInStorage(String imageUrl) {
+        try {
+            File fileToDelete = new File(imageUrl);
+            if (fileToDelete.exists() && fileToDelete.isFile()) {
+                return fileToDelete.delete();
+            } else {
+                log.info("[ImageService:removeInStorage] 파일을 찾을 수 없거나 디렉토리입니다 imageUrl: " + imageUrl);
+                return false;
+            }
+        } catch (Exception e) {
+            log.info("[ImageService:removeInStorage] msg: " + e.getMessage(), e);
+            return false;
+        }
+    }
+
     private String downloadImage(String url) {
         try {
             InputStream inputStream = new URL(url).openStream();
