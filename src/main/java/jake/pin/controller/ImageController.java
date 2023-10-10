@@ -78,6 +78,15 @@ public class ImageController {
         return response;
     }
 
+    @GetMapping("/{imageId}")
+    public ImageRes getImage(@PathVariable Long imageId) {
+        validateImageId(imageId);
+
+        ImageRes cachedImage = service.getCachedImage(imageId);
+        service.updateViewCountInCache(imageId);
+        return cachedImage;
+    }
+
     private void validateUserId(Long userId) {
         if (userId <= 0) {
             throw new IllegalArgumentException("로그인이 필요한 기능입니다.");

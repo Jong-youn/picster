@@ -10,6 +10,9 @@ import jake.pin.service.dto.ImageUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.Async;
@@ -37,7 +40,7 @@ import java.util.concurrent.CompletableFuture;
 public class ImageService {
 
     private final ImageRepository repository;
-//    private final CacheManager cacheManager;
+    private final CacheManager cacheManager;
     @Value("${storage.path}")
     private String STORAGE_PATH;
 
@@ -125,6 +128,30 @@ public class ImageService {
 
         List<ImageRes> responses = convertToRes(entities.getContent());
         return new PageImpl<>(responses, entities.getPageable(), entities.getTotalElements());
+    }
+
+    @Cacheable(value = "getImage", key = "#imageId")
+    public ImageRes getCachedImage(long imageId) {
+        Image image = repository.getImageById(imageId);
+        if (image == null) {
+            throw new IllegalArgumentException("이미지를 찾을 수 없습니다.");
+        }
+
+        return convertToRes(image);
+    }
+
+    public void updateViewCountInCache(long imageId) {
+        Cache cache = cacheManager.getCache("getImage");
+        if (cache != null) {
+            Cache.ValueWrapper valueWrapper = cache.get(imageId);
+            if (valueWrapper != null) {
+                ImageRes image = (ImageRes) valueWrapper.get();
+                if (image != null) {
+                    // 이미지 객체의 조회수만 업데이트
+                    image.setViewCount(image.getViewCount() + 1);
+                }
+            }
+        }
     }
 
     private boolean removeInStorage(String imageUrl) {

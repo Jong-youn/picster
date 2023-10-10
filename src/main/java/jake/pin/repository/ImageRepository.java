@@ -166,4 +166,25 @@ public class ImageRepository {
             return null;
         }
     }
+
+    public Image getImageById(long imageId) {
+        try {
+            StringBuilder query = new StringBuilder();
+            query.append(" SELECT /* ImageRepository_getImageById */ ");
+            query.append("      id, ");
+            query.append("      image_url, ");
+            query.append("      title, ");
+            query.append("      description, ");
+            query.append("      view_count ");
+            query.append(" FROM image ");
+            query.append(" WHERE deleted_at IS NULL ");
+            query.append("      AND id = :id ");
+
+            Image image = jdbcTemplate.queryForObject(query.toString(), new MapSqlParameterSource("id", imageId), imageMapper);
+            return image;
+        } catch (Exception e) {
+            log.warn("[ImageRepository:getImageById] msg: " + e.getMessage(), e);
+            return null;
+        }
+    }
 }
