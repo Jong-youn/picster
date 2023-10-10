@@ -187,4 +187,22 @@ public class ImageRepository {
             return null;
         }
     }
+
+    public int updateViewCount(long imageId, long viewCount) {
+        try {
+            StringBuilder query = new StringBuilder();
+            query.append(" UPDATE /* ImageRepository_updateViewCount */ image ");
+            query.append(" SET view_count = :viewCount ");
+            query.append(" WHERE id = :id ");
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("viewCount", viewCount);
+            params.addValue("id", imageId);
+
+            return jdbcTemplate.update(query.toString(), params);
+        } catch (Exception e) {
+            log.warn("[ImageRepository:updateViewCount] msg: " + e.getMessage(), e);
+            return 0;
+        }
+    }
 }
