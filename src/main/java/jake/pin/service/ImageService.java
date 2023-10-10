@@ -3,12 +3,14 @@ package jake.pin.service;
 import jake.pin.repository.ImageRepository;
 import jake.pin.repository.entity.Image;
 import jake.pin.service.dto.ImageCreateDto;
+import jake.pin.service.dto.ImageUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +57,30 @@ public class ImageService {
         }
 
         return CompletableFuture.completedFuture(imageId);
+    }
+
+    @Transactional
+    public void modify(ImageUpdateDto dto) {
+        // 유저가 포스팅한 이미지인지 확인
+        Image findImage = repository.getImageByIdAndUserId(dto.getId(), dto.getUserId());
+        if (findImage == null) {
+            log.warn("부적절한 이미지 변경시도가 의심됩니다.");
+            throw new IllegalArgumentException("이미지를 찾을 수 없습니다.");
+        }
+
+        // 데이터 변경
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        Image image = Image.builder()
+                .id(dto.getId())
+                .userId(dto.getUserId())
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .updatedAt(now)
+                .build();
+        int result = repository.modify(image);
+        if (result < 1) {
+            throw new RuntimeException("수정에 실패했습니다. 다시 시도해주세요.");
+        }
     }
 
     private String downloadImage(String url) {
