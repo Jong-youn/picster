@@ -1,14 +1,18 @@
 package jake.pin.controller;
 
 import jake.pin.controller.model.request.ImageCreateReq;
+import jake.pin.controller.model.request.ImageListSearchReq;
 import jake.pin.controller.model.request.ImageUpdateReq;
+import jake.pin.controller.model.response.CommonListRes;
 import jake.pin.controller.model.response.ImageCreateRes;
+import jake.pin.controller.model.response.ImageRes;
 import jake.pin.service.ImageService;
 import jake.pin.service.UserService;
 import jake.pin.service.dto.ImageCreateDto;
 import jake.pin.service.dto.ImageUpdateDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.CompletableFuture;
@@ -59,6 +63,19 @@ public class ImageController {
         validateImageId(imageId);
 
         service.remove(imageId, userId);
+    }
+
+    @GetMapping
+    public CommonListRes<ImageRes> getImages(ImageListSearchReq request) {
+        request.valid();
+        Page<ImageRes> images =  service.getImages(request);
+
+        CommonListRes<ImageRes> response = new CommonListRes<>(images.getContent());
+        response.setCurrentCount(images.getContent().size());
+        response.setCurrentPage(images.getPageable().getPageNumber());
+        response.setTotalCount(images.getTotalElements());
+        response.setTotalPages(images.getTotalPages());
+        return response;
     }
 
     private void validateUserId(Long userId) {

@@ -1,8 +1,14 @@
 package jake.pin.repository;
 
 import jake.pin.repository.entity.Image;
+import jake.pin.repository.entity.ImageListSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.util.ParameterMap;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,6 +16,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 @Slf4j
@@ -111,6 +120,50 @@ public class ImageRepository {
         } catch (Exception e) {
             log.warn("[ImageRepository:remove] msg: " + e.getMessage(), e);
             return 0;
+        }
+    }
+
+    public Page<Image> getImages(ImageListSearch request) {
+        StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append(" SELECT /* ImageRepository_getImages */ ");
+        selectQuery.append("    id, ");
+        selectQuery.append("    title, ");
+        selectQuery.append("    image_url, ");
+        selectQuery.append("    view_count ");
+
+        StringBuilder fromQuery = new StringBuilder(" FROM image ");
+        StringBuilder whereQuery = new StringBuilder(" WHERE deleted_at IS NULL ");
+
+        Long count = jdbcTemplate.queryForObject("SELECT /* ImageRepository_getImages_count */ count(*) "
+                + fromQuery + whereQuery, new ParameterMap<>(), Long.class);
+
+        StringBuilder orderByQuery = new StringBuilder(" ORDER BY created_at desc ");
+        orderByQuery.append(" LIMIT :limit OFFSET :offset ");
+
+        StringBuilder query = selectQuery.append(fromQuery).append(whereQuery).append(orderByQuery);
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("limit", request.getLimit());
+        params.addValue("offset", request.getOffset());
+
+        try {
+            PageRequest pageable = PageRequest.of(request.getPage(), request.getLimit(), Sort.Direction.DESC, "createdAt");
+            List<Image> images = jdbcTemplate.query(query.toString(), params,
+                    rs -> {
+                        List<Image> list = new ArrayList<>();
+                        int row = 0;
+                        while (rs.next()) {
+                            Image image = imageMapper.mapRow(rs, row);
+                            list.add(image);
+                            row++;
+                        }
+                        return list;
+                    }
+            );
+            return new PageImpl<>(images, pageable, count);
+        } catch (Exception e) {
+            log.warn("[ImageRepository:getImages] msg: " + e.getMessage(), e);
+            return null;
         }
     }
 }
