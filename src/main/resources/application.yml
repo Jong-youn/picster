@@ -6,3 +6,5 @@ spring:
 logging:
   level:
     org.springframework.jdbc: DEBUG
+storage:
+  path: src/main/resources/storage/
