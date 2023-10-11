@@ -13,12 +13,14 @@ services:
     volumes:
       - ./my.cnf:/etc/mysql/conf.d/my.cnf
       - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
-#  web:
-#    build: .
-#    container_name: pinster-server
-#    ports:
-#      - "18080:8080"
-#    depends_on:
-#      - mysql
-#    networks:
-#      - default
+    networks:
+      - default
+  web:
+    build: .
+    container_name: pinster-server
+    ports:
+      - "18080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - default

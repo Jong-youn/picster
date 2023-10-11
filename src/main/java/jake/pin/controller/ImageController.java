@@ -83,7 +83,7 @@ public class ImageController {
         validateImageId(imageId);
 
         ImageRes cachedImage = service.getCachedImage(imageId);
-        service.updateViewCountInCache(imageId);
+//        service.updateViewCountInCache(imageId);
         return cachedImage;
     }
 

@@ -17,6 +17,7 @@
 - MySQL
 - Lombok
 - Junit 5
+- Docker
 
 ### 실행방법
 ```

@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class ImageRepository {
     private final RowMapper<Image> imageMapper = BeanPropertyRowMapper.newInstance(Image.class);
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
+    @Transactional
     public Long save(Image image) {
         try {
             StringBuilder query = new StringBuilder();
@@ -46,7 +48,7 @@ public class ImageRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             jdbcTemplate.update(query.toString(), params, keyHolder);
 
-            return (Long) keyHolder.getKeys().get("ID");
+            return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", new ParameterMap<>(), Long.class);
         } catch (Exception e) {
             log.warn("[ImageRepository:save] msg: " + e.getMessage(), e);
             return 0L;

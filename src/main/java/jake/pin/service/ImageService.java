@@ -130,7 +130,7 @@ public class ImageService {
         return new PageImpl<>(responses, entities.getPageable(), entities.getTotalElements());
     }
 
-    @Cacheable(value = "getImage", key = "#imageId")
+//    @Cacheable(value = "getImage", key = "#imageId")
     public ImageRes getCachedImage(long imageId) {
         Image image = repository.getImageById(imageId);
         if (image == null) {

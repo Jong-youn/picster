@@ -24,3 +24,5 @@ CREATE TABLE pinster.image
     unique (id)
 );
 CREATE INDEX created_at ON pinster.image(created_at);
+
+insert into pinster.user(`id`, `name`, `account`, `password`) values (1, 'USER1', 'USER1', 'password1');

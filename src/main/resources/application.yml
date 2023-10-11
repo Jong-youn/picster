@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:13306/pinster
+    url: jdbc:mysql://pinster-db:3306/pinster
     username: root
     password: root
 logging:
