@@ -24,3 +24,4 @@ services:
       - mysql
     networks:
       - default
+
