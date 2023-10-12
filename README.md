@@ -22,4 +22,6 @@
 ### 실행방법
 ```
 gh repo clone Jong-youn/picster
+cd picster
+docker-compose up
 ```
