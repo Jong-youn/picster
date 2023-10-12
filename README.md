@@ -21,5 +21,5 @@
 
 ### 실행방법
 ```
-
+gh repo clone Jong-youn/picster
 ```
