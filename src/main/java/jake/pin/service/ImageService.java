@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,6 +37,11 @@ public class ImageService {
     @Async
     public CompletableFuture<Long> create(ImageCreateDto dto) {
         // 이미지 다운로드 및 스토리지에 저장
+        if (ObjectUtils.isEmpty(dto.getImageURL())) {
+            log.info("이미지 저장에 실패했습니다.");
+            throw new RuntimeException("올바른 이미지 주소를 입력해주세요.");
+        }
+
         byte[] fileUrl = FileCreator.download(dto.getImageURL());
         String fileName = FileCreator.generateFileName(dto.getImageURL());
         String path = StorageHelper.save(fileUrl, fileName);
