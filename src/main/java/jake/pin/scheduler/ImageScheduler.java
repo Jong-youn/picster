@@ -1,4 +1,4 @@
-package jake.pin.service;
+package jake.pin.scheduler;
 
 import jakarta.annotation.PreDestroy;
 import jake.pin.controller.model.response.ImageRes;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ImageSchedulerService {
+public class ImageScheduler {
 
     private final CacheManager cacheManager;
     private final ImageRepository repository;
