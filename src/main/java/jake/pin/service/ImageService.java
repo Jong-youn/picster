@@ -58,6 +58,7 @@ public class ImageService {
 
         long imageId = repository.save(image);
         if (imageId < 1) {
+            StorageHelper.remove(fileName);
             log.info("이미지 저장에 실패했습니다.");
             throw new RuntimeException("이미지 저장에 실패했습니다. 다시 시도해주세요.");
         }

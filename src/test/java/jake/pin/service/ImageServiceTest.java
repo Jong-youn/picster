@@ -5,24 +5,20 @@ import jake.pin.repository.entity.Image;
 import jake.pin.repository.entity.User;
 import jake.pin.service.dto.ImageCreateDto;
 import jake.pin.service.dto.ImageUpdateDto;
-import jake.pin.utils.FileCreator;
-import jake.pin.utils.StorageHelper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,12 +33,45 @@ class ImageServiceTest {
     @DisplayName("이미지 저장시")
     class saveTest {
         @Test
+        @DisplayName("정상 작동")
+        void saveImageSuccess() {
+            // given
+            User user = getUser();
+            ImageCreateDto dto = getImageCreateDto(user.getId());
+
+            // stub
+            when(repository.save(any(Image.class))).thenReturn(1L);
+
+            // when
+            CompletableFuture<Long> result = service.create(dto);
+            Long imageId = result.join();
+
+            // then
+            assertEquals(1L, imageId);
+        }
+
+        @Test
         @DisplayName("이미지 주소를 입력하지 않으면 예외 발생")
         void saveImageWithoutUrl() {
             // given
             ImageCreateDto dto = getImageCreateDtoWithoutImageUrl();
 
             // when, then
+            assertThatThrownBy(() -> service.create(dto))
+                    .isInstanceOf(RuntimeException.class);
+        }
+
+        @Test
+        @DisplayName("이미지 정보를 디비에 저장하는 것에 실패하면 예외 발생하고 파일 삭제")
+        void failToSaveOnDB() {
+            // given
+            User user = getUser();
+            ImageCreateDto dto = getImageCreateDto(user.getId());
+
+            // stub, when
+            given(repository.save(any(Image.class))).willReturn(0l);
+
+            // then
             assertThatThrownBy(() -> service.create(dto))
                     .isInstanceOf(RuntimeException.class);
         }

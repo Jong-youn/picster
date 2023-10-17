@@ -30,7 +30,7 @@ public class StorageHelper {
 
     public static boolean remove(String path) {
         try {
-            File fileToDelete = new File(path);
+            File fileToDelete = new File(STORAGE_PATH + path);
             if (fileToDelete.exists() && fileToDelete.isFile()) {
                 return fileToDelete.delete();
             } else {
