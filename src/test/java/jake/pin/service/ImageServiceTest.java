@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
@@ -81,6 +81,21 @@ class ImageServiceTest {
     @DisplayName("이미지 정보 변경시")
     class modifyTest {
         @Test
+        @DisplayName("정상 작동")
+        void modify() {
+            // given
+            ImageUpdateDto dto = getImageUpdateDto();
+            Image image = getImage(dto.getUserId());
+
+            // stub, when
+            given(repository.getImageByIdAndUserId(dto.getId(), dto.getUserId())).willReturn(image);
+            given(repository.modify(any(Image.class))).willReturn(1);
+
+            // then
+            service.modify(dto);
+        }
+
+        @Test
         @DisplayName("다른 유저가 스크랩한 이미지를 변경시도하면 예외가 발생한다")
         void modifyIllegalImage() {
             // given
@@ -103,7 +118,7 @@ class ImageServiceTest {
 
             // stub
             given(repository.getImageByIdAndUserId(dto.getId(), dto.getUserId())).willReturn(image);
-            given(repository.modify(image)).willReturn(0);
+            given(repository.modify(any(Image.class))).willReturn(0);
 
             // then
             assertThatThrownBy(() -> service.modify(dto))
